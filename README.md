@@ -17,3 +17,13 @@ npm run serve
 npm run build
 ```
 
+
+### Screenshot of the App
+
+![Landing Page](/screenshot/Landing_Page.png?raw=true "Landing Page")
+
+
+![DashBoard](/screenshot/Dashboard.png?raw=true "DashBoard")
+
+
+![Add New Reminder](/screenshot/Add_Reminder.png?raw=true "Add New Reminder")

@@ -11,32 +11,32 @@ export default new Vuex.Store({
     reminders: [
       {
         id: "11234",
-        date: "Jan. 20, 2019 10:08 AM",
-        description: "aaaaa aaaaa aaaaaaa aaaaaaaaaaa aaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaa aaaaaaa aaaaaaaa aaaaaaaa aaaaaaaaaaaa",
+        date: "Feb. 20, 2019 10:08 AM",
+        description: "Build Reminder App",
         status: "done"
       },
       {
         id: "1123",
-        date: "Jan. 20, 2019 10:08 AM",
-        description: "Soumesh",
+        date: "Feb. 20, 2019 07:08 AM",
+        description: "Go For a Walk",
         status: "done"
       },
       {
         id: "112",
-        date: "Jan. 20, 2019 10:08 AM",
-        description: "Yahoo",
+        date: "Feb. 20, 2019 5:08 PM",
+        description: "Return Amazon Order",
         status: "done"
       },
       {
         id: "1123411",
-        date: "Jan. 20, 2019 10:08 AM",
-        description: "Microsoft",
+        date: "Feb. 20, 2019 6:08 PM",
+        description: "Buy a storage box from Ikea",
         status: "done"
       },
       {
         id: "1123412",
-        date: "Jan. 20, 2019 10:08 AM",
-        description: "Apple",
+        date: "Feb. 20, 2019 10:08 PM",
+        description: "Recharge my DTH",
         status: "done"
       }
     ]
