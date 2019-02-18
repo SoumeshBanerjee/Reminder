@@ -1,5 +1,7 @@
 # Remind is a simple reminder tool, written in VUEJS
 
+[![Build Status](https://travis-ci.org/SoumeshBanerjee/Reminder.svg?branch=master)](https://travis-ci.org/SoumeshBanerjee/Reminder)
+
 ## Project setup
 ```bash
 npm install
