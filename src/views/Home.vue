@@ -2,7 +2,7 @@
   <div class="home">
     <div class="container is-fullhd">
       <br>
-      <h3 class="subtitle is-3">{{$store.state.APP_NAME}}</h3>
+      <h3 class="subtitle is-3">{{userName}}'s {{$store.state.APP_NAME}}</h3>
       <RemindersPane></RemindersPane>
     </div>
   </div>
@@ -26,6 +26,7 @@
 
 <script>
 import RemindersPane from '@/components/RemindersPane.vue'
+import Util from '@/controllers/Util.js'
 
 export default {
   name: 'home',
@@ -41,6 +42,11 @@ export default {
     return {
       shouldShowNotification: false,
       totalNotificationCount: 1,
+    }
+  },
+  computed: {
+    userName(){
+      return Util.getCookie("UserName")
     }
   }
 }
