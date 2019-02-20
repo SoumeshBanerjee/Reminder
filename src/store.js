@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import ReminderManager from '@/controllers/ReminderManager.js'
 
 Vue.use(Vuex)
 
@@ -8,51 +9,114 @@ export default new Vuex.Store({
     APP_NAME: "Reminders",
     isAuthenticatedUser: false,
     searchKeyword: "",
-    reminders: [
-      {
-        id: "11234",
-        date: "Feb. 20, 2019 10:08 AM",
-        description: "Build Reminder App",
-        status: "done"
-      },
-      {
-        id: "1123",
-        date: "Feb. 20, 2019 07:08 AM",
-        description: "Go For a Walk",
-        status: "done"
-      },
-      {
-        id: "112",
-        date: "Feb. 20, 2019 5:08 PM",
-        description: "Return Amazon Order",
-        status: "done"
-      },
-      {
-        id: "1123411",
-        date: "Feb. 20, 2019 6:08 PM",
-        description: "Buy a storage box from Ikea",
-        status: "done"
-      },
-      {
-        id: "1123412",
-        date: "Feb. 20, 2019 10:08 PM",
-        description: "Recharge my DTH",
-        status: "done"
-      }
-    ]
+    tabFilter: 'inbox',
+    reminders: [],
+    globalErrorMessage: ""
   },
   mutations: {
-    userAuthenticated(state, val){
+    userAuthenticated(state, val) {
       state.isAuthenticatedUser = val
     },
-    deleteReminder(state, id){
+    deleteReminder(state, id) {
       const index = state.reminders.findIndex(reminder => reminder.id === id);
       state.reminders.splice(index, 1);
+    },
+    setReminders(state, reminders) {
+      state.reminders = reminders
+    },
+    setGlobalErrorMessage(state, msg) {
+      state.globalErrorMessage = msg
+    },
+    switchTabFilter(state, currentFilter) {
+      state.tabFilter = currentFilter
+    },
+    markDoneReminder(state, id) {
+      const index = state.reminders.findIndex(reminder => reminder.id === id);
+      state.reminders[index].completed = 1
+    },
+    markUnDoneReminder(state, id) {
+      const index = state.reminders.findIndex(reminder => reminder.id === id);
+      state.reminders[index].completed = 0
+    },
+    addNewReminder(state, reminder) {
+      state.reminders.push(reminder)
     }
   },
   actions: {
-    deleteReminder(ctx, id){
-      ctx.commit("deleteReminder", id)
+    deleteReminder(ctx, id) {
+      ReminderManager.deleteReminder(id)
+        .then(resp => {
+          if (!resp.data.ok) {
+            throw new Error(`Response received from server but not ok, ${resp.data}`)
+          }
+          ctx.commit("deleteReminder", id)
+        })
+        .catch(err => {
+          ctx.commit("setGlobalErrorMessage", `Failed to delete the reminder for the user`)
+          console.error(`Failed to delete reminder ${err}`)
+        })
+    },
+    markDoneReminder(ctx, id) {
+      ReminderManager.markDoneReminder(id)
+        .then(resp => {
+          if (!resp.data.ok) {
+            throw new Error(`Response received from server but not ok, ${resp.data}`)
+          }
+          ctx.commit("markDoneReminder", id)
+        })
+        .catch(err => {
+          ctx.commit("setGlobalErrorMessage", `Failed to mark reminder as done`)
+          console.error(`Failed to mark reminder as done ======> ${err}`)
+        })
+    },
+    markUnDoneReminder(ctx, id) {
+      ReminderManager.markUnDoneReminder(id)
+        .then(resp => {
+          if (!resp.data.ok) {
+            throw new Error(`Response received from server but not ok, ${resp.data}`)
+          }
+          ctx.commit("markUnDoneReminder", id)
+        })
+        .catch(err => {
+          ctx.commit("setGlobalErrorMessage", `Failed to mark reminder as undone`)
+          console.error(`Failed to mark reminder as done ======> ${err}`)
+        })
+    },
+    switchTabFilter(ctx, currentFilter) {
+      ctx.dispatch('fetchReminders')
+      ctx.commit('switchTabFilter', currentFilter)
+    },
+    fetchReminders(ctx) {
+      ReminderManager.getAllReminders()
+        .then(resp => {
+          if (!resp.data.ok) {
+            throw new Error(`Response received from server but not ok, ${resp.data}`)
+          }
+          ctx.commit("setReminders", resp.data.results)
+        })
+        .catch(err => {
+          ctx.commit("setGlobalErrorMessage", `Failed to retrive the reminders for the user`)
+          console.error(`Reminder failed to come ======> ${err}`)
+        })
+    },
+    addNewReminder(ctx, payload) {
+      ReminderManager.createReminder(payload)
+        .then(resp => {
+          if (!resp.data.ok) {
+            throw new Error(`Response received from server but not ok, ${resp.data}`)
+          }
+          ctx.commit('addNewReminder', {
+            id: resp.data.results.insertId,
+            description: payload.description,
+            due: payload.due,
+            completed: 0
+          }
+          )
+        })
+        .catch(err => {
+          ctx.commit("setGlobalErrorMessage", `Failed to save the reminders for the user`)
+          console.error(`Reminder failed to save ======> ${err}`)
+        })
     }
   }
 })

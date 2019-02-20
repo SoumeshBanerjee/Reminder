@@ -1,3 +1,4 @@
+import axios from 'axios'
 import Util from '@/controllers/Util.js'
 import Constants from '@/controllers/Constants.js'
 
@@ -18,8 +19,21 @@ export default class UserAuthManager{
         return new Promise((ok, err) => {
             const userId = Util.uuid()
             const cookieValue = `${UserAuthManager.PRE_COOKIE_VALUE}-${userId}`
-            Util.setCookie(UserAuthManager.COOKIE_NAME, cookieValue, 365)
-            ok({ok:true, userId: cookieValue})
+
+            axios.post('/user', {
+                name: name,
+                token: cookieValue
+            })
+            .then(resp=>{
+                if (!resp.data.ok) {
+                    err(`Unable to create user account`)
+                }
+                Util.setCookie(UserAuthManager.COOKIE_NAME, cookieValue, 365)
+                ok({ok:true, userId: cookieValue})
+            })
+            .catch(err=>{
+                err(err)
+            })
         })
     }
 }

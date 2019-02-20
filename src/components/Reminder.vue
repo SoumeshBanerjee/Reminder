@@ -1,97 +1,71 @@
 <template>
-    <tbody>
-        <tr v-for="(reminder, index) in filteredReminder" :key="reminder.id">
-            <td>{{index}}</td>
-            <td>{{reminder.date}}</td>
-            <td>{{processDescription(reminder.description)}}</td>
-            <td>
-                <span class="icon done">
-                    <i class="fas fa-check fa-lg" @click="markDone(reminder)"></i>
-                </span>
-                &nbsp;
-                <span class="icon trash">
-                    <i class="fas fa-trash fa-lg" @click="markDelete(reminder)"></i>
-                </span>
-            </td>
-        </tr>
-        <Prompt
-      :is-show="showDeletePrompt"
-      prompt-title="Delete the Reminder"
-      prompt-ok-btn="Delete"
-      prompt-ok-btn-class="is-danger"
-      @dismissed="deleteReminderPropmptDismissed"
-      @approved="deleteReminderPropmptConfirmedDeletion(deletingReminderId)"
-    >
-    <strong>Are you sure to delete the Reminder</strong>
-    <hr>
-    {{deletingReminderDescription}}
-    </Prompt>
-    </tbody>
+  <div class="notification">
+    <div class="columns">
+      <div class="column is-2">{{dueDate}}</div>
+      <div class="column is-9">{{descriptionText}}</div>
+      <div class="column is-1">
+        <span
+          class="icon done space-right"
+          v-if="$store.state.tabFilter === 'inbox' || $store.state.tabFilter === 'snooze'"
+        >
+          <i class="fas fa-check fa-lg" @click="markDone(id)"/>
+        </span>
+        <span class="icon undone space-right" v-else>
+          <i class="fas fa-undo fa-lg" @click="markUndone(id)"/>
+        </span>
+        &nbsp;
+        <span class="icon trash is-pulled-right">
+          <i class="fas fa-trash fa-lg" @click="markDelete(id, descriptionText)"></i>
+        </span>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.icon{
-    opacity: 0.2;
-    cursor: pointer;
-    transition: all 1s;
+.notification {
+  text-align: left;
+  margin-bottom: 0.5em;
 }
-.icon:hover{
-    opacity: 1;
+.icon {
+  opacity: 0.2;
+  cursor: pointer;
+  transition: all 1s;
 }
-.done:hover{
-    color: hsl(141, 71%, 48%);
+.icon:hover {
+  opacity: 1;
 }
-.trash:hover{
-    color: hsl(348, 100%, 61%)
+.done:hover {
+  color: hsl(141, 71%, 48%);
+}
+.undone:hover{
+    color: hsl(48, 100%, 67%);
+}
+.trash:hover {
+  color: hsl(348, 100%, 61%);
+}
+.space-right {
+  margin-left: 1em;
 }
 </style>
 
 
 
 <script>
-import Prompt from "@/components/Prompt.vue";
 export default {
-    name: "Reminder",
-    components: {
-        Prompt
+  name: "Reminder",
+  props: ["id", "dueDate", "descriptionText"],
+  methods: {
+    markDone(id) {
+      this.$emit("done", id);
     },
-    computed : {
-        filteredReminder(){
-            return this.$store.state.reminders.filter(rem => rem.description.toLowerCase().match(this.$store.state.searchKeyword.toLowerCase()))
-        }
+    markUndone(id) {
+      this.$emit("undone", id);
     },
-    data(){
-        return {
-            showDeletePrompt: false,
-            deletingReminderDescription: "",
-            deletingReminderId: ''
-        }
-    },
-    methods:{
-        processDescription(desc){
-            if (desc.length > 100) {
-                return `${desc.substring(0, 100)}...`
-            }
-            return desc
-        },
-        markDone(reminder){
-            
-        },
-        markDelete(reminder){
-            this.showDeletePrompt = true
-            this.deletingReminderDescription = reminder.description
-            this.deletingReminderId = reminder.id
-        },
-        deleteReminderPropmptDismissed(){
-            this.showDeletePrompt = false
-            this.deletingReminderDescription = ""
-            this.deletingReminderId = ""
-        },
-        deleteReminderPropmptConfirmedDeletion(id){
-            this.$store.dispatch("deleteReminder", id);
-            this.deleteReminderPropmptDismissed()
-        }
+    markDelete(id, descriptionText) {
+      this.$emit("delete", id, descriptionText);
     }
-}
+  }
+};
 </script>
 
