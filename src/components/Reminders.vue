@@ -1,15 +1,26 @@
 <template>
-  <div>
-    <Reminder
-      v-for="reminder in filteredReminder"
-      :key="reminder.id"
-      :due-date="reminder.due"
-      :description-text="processDescription(reminder.description)"
-      :id="reminder.id"
-      @delete="onDelete"
-      @done="onDone"
-      @undone="onUndone"
-    ></Reminder>
+  <div class="scrollable">
+    <div v-for="reminder in filteredReminder" :key="reminder.id">
+      <EditableReminder
+        v-if="reminder.editable == true"
+        :due-date="reminder.due"
+        :description-text="processDescription(reminder.description)"
+        :id="reminder.id"
+        @delete="onDelete"
+        @done="onDone"
+        @undone="onUndone"
+        @onReminderUpdated="reminderUpdated"
+      ></EditableReminder>
+      <Reminder
+        v-else
+        :due-date="reminder.due"
+        :description-text="processDescription(reminder.description)"
+        :id="reminder.id"
+        @delete="onDelete"
+        @done="onDone"
+        @undone="onUndone"
+      ></Reminder>
+    </div>
     <Prompt
       :is-show="showDeletePrompt"
       prompt-title="Delete the Reminder"
@@ -25,9 +36,25 @@
   </div>
 </template>
 
+
+<style lang="scss" scoped>
+.scrollable{
+    height: calc(70vh - 10px);
+    overflow-y: scroll;
+}
+</style>
+
+
 <script>
+import Vue from 'vue'
 import Reminder from "@/components/Reminder.vue";
 import Prompt from "@/components/Prompt.vue";
+import EditableReminder from "@/components/EditableReminder.vue";
+import Timepicker from 'buefy/dist/components/timepicker'
+import DatePicker from 'buefy/dist/components/datepicker'
+import 'buefy/dist/buefy.css'
+Vue.use(Timepicker)
+Vue.use(DatePicker)
 
 export default {
   name: "Reminders",
@@ -36,6 +63,7 @@ export default {
   },
   components: {
     Reminder,
+    EditableReminder,
     Prompt
   },
   computed: {
@@ -46,12 +74,10 @@ export default {
           .match(this.$store.state.searchKeyword.toLowerCase())
       );
       if (this.$store.state.tabFilter == "inbox") {
-        let currTime = new Date()
-        searchFilteredReminder = searchFilteredReminder.filter(
-          rem => rem.completed == false
-        ).filter(
-          rem => new Date(rem.due) < currTime
-        )
+        var currTime = new Date();
+        searchFilteredReminder = searchFilteredReminder
+          .filter(rem => rem.completed == false)
+          .filter(rem => new Date(rem.due) < currTime);
       }
       if (this.$store.state.tabFilter == "done") {
         searchFilteredReminder = searchFilteredReminder.filter(
@@ -59,12 +85,10 @@ export default {
         );
       }
       if (this.$store.state.tabFilter == "snooze") {
-        let currTime = new Date()
-        searchFilteredReminder = searchFilteredReminder.filter(
-          rem => rem.completed == false
-        ).filter(
-          rem => new Date(rem.due) > currTime
-        )
+        let currTime = new Date();
+        searchFilteredReminder = searchFilteredReminder
+          .filter(rem => rem.completed == false)
+          .filter(rem => new Date(rem.due) > currTime);
       }
       return searchFilteredReminder;
     }
@@ -77,6 +101,13 @@ export default {
     };
   },
   methods: {
+    reminderUpdated(obj){
+      this.$store.dispatch("updateReminder", {
+        id: obj.id,
+        due: obj.due,
+        description: obj.description
+      })
+    },
     onDelete(id, description) {
       this.showDeletePrompt = true;
       this.deletingReminderDescription = description;

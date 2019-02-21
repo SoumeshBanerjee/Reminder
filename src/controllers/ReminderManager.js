@@ -16,4 +16,7 @@ export default class ReminderManager {
     static async createReminder(payload){
         return await axios.post('/reminders', payload)
     }
+    static async updateReminder(id, payload){
+        return await axios.patch(`/reminders/${id}`, payload)
+    }
 }

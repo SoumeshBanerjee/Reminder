@@ -38,45 +38,16 @@
       prompt-title="Add a new Reminder"
       prompt-ok-btn="Remind Me!"
       prompt-ok-btn-class="is-warning"
+      height="80%"
       @dismissed="addNewReminderPropmptDismissed"
       @approved="saveNewReminder"
     >
       <div class="columns">
-        <div class="column is-5">
-          <div class="control has-icons-left has-icons-right">
-            <input
-              class="input"
-              :class="{'is-danger': newReminderModel.errorCSS.date}"
-              type="text"
-              placeholder="yyyy/mm/dd"
-              v-model="newReminderModel.date"
-            >
-            <span class="icon is-small is-left">
-              <i class="fas fa-calendar"></i>
-            </span>
-          </div>
+        <div class="column is-6">
+          <b-datepicker v-model="newReminderModel.date" icon-pack="fas" size="is-medium"></b-datepicker>
         </div>
-        <div class="column is-5">
-          <div class="control has-icons-left has-icons-right">
-            <input
-              class="input"
-              :class="{'is-danger': newReminderModel.errorCSS.time}"
-              type="text"
-              placeholder="HH:MM"
-              v-model="newReminderModel.time"
-            >
-            <span class="icon is-small is-left">
-              <i class="fas fa-clock"></i>
-            </span>
-          </div>
-        </div>
-        <div class="column is-2">
-          <div class="select">
-            <select v-model="newReminderModel.am_pm">
-              <option selected>AM</option>
-              <option>PM</option>
-            </select>
-          </div>
+        <div class="column is-6">
+          <b-timepicker v-model="newReminderModel.time" inline hour-format="12" size="is-small"></b-timepicker>
         </div>
       </div>
       <textarea
@@ -120,13 +91,10 @@ export default {
       newReminderModel: {
         errorMessage: "",
         description: "",
-        date: "",
-        time: "",
-        am_pm: "AM",
+        date: new Date(),
+        time: new Date(),
         errorCSS: {
-          description: false,
-          date: false,
-          time: false
+          description: false
         }
       }
     };
@@ -136,34 +104,29 @@ export default {
       this.showAddNewReminderPropmpt = false;
       this.newReminderModel.errorMessage = "";
       this.newReminderModel.description = "";
-      this.newReminderModel.date = "";
-      this.newReminderModel.time = "";
-      this.newReminderModel.am_pm = "AM";
+      this.newReminderModel.date = new Date();
+      this.newReminderModel.time = new Date();
       this.newReminderModel.errorCSS.description = false;
-      this.newReminderModel.errorCSS.time = false;
-      this.newReminderModel.errorCSS.date = false;
     },
     createDateString(d) {
       return `${d.getFullYear()}-${d.getMonth() +
         1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
     },
     saveNewReminder() {
-      let dateObj = new Date(
-        `${this.newReminderModel.date} ${this.newReminderModel.time} ${
-          this.newReminderModel.am_pm
-        }`
-      );
-      if (dateObj == "Invalid Date") {
-        this.newReminderModel.errorCSS.time = true;
-        this.newReminderModel.errorCSS.date = true;
-        this.newReminderModel.errorMessage =
-          "Invalid Date/ Time use(YYYY/MM/DD HH:MM) format";
-      } else if (
+      let dueDate = new Date()
+      
+      dueDate.setFullYear(this.newReminderModel.date.getFullYear())
+      dueDate.setMonth(this.newReminderModel.date.getMonth())
+      dueDate.setDate(this.newReminderModel.date.getDate())
+
+      dueDate.setHours(this.newReminderModel.time.getHours())
+      dueDate.setMinutes(this.newReminderModel.time.getMinutes())
+
+
+      if (
         this.newReminderModel.description === "" ||
         this.newReminderModel.description.length < 5
       ) {
-        this.newReminderModel.errorCSS.time = false;
-        this.newReminderModel.errorCSS.date = false;
         this.newReminderModel.errorCSS.description = true;
         this.newReminderModel.errorMessage =
           "Description is mandatory and should be at least 5 character";
@@ -176,7 +139,7 @@ export default {
         this.newReminderModel.errorMessage = "";
         this.$store.dispatch("addNewReminder", {
           description: this.newReminderModel.description,
-          due: this.createDateString(dateObj)
+          due: this.createDateString(dueDate)
         });
         this.addNewReminderPropmptDismissed();
       }

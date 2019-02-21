@@ -10,10 +10,6 @@
 
 
 <style lang="scss" scoped>
-// .pagination-list{
-//   flex-grow: 1;
-//   justify-content: center;
-// }
 .subtitle.is-3{
   text-align: left;
 }

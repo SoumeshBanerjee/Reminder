@@ -10,7 +10,29 @@ export default new Vuex.Store({
     isAuthenticatedUser: false,
     searchKeyword: "",
     tabFilter: 'inbox',
-    reminders: [],
+    reminders: [
+      {
+        "id": 62,
+        "description": "Work Work Work and more work",
+        "due": "2019-02-22 22:12:13",
+        "completed": 1,
+        "editable": false
+      },
+      {
+        "id": 92,
+        "description": "happy Done",
+        "due": "2019-02-22 10:12:13",
+        "completed": 0,
+        "editable": false
+      },
+      {
+        "id": 142,
+        "description": "happy Done",
+        "due": "2019-02-22 10:12:13",
+        "completed": 0,
+        "editable": false
+      }
+    ],
     globalErrorMessage: ""
   },
   mutations: {
@@ -22,6 +44,10 @@ export default new Vuex.Store({
       state.reminders.splice(index, 1);
     },
     setReminders(state, reminders) {
+      reminders.map(rem => {
+        rem.editable = false
+        return rem
+      });
       state.reminders = reminders
     },
     setGlobalErrorMessage(state, msg) {
@@ -40,9 +66,38 @@ export default new Vuex.Store({
     },
     addNewReminder(state, reminder) {
       state.reminders.push(reminder)
+    },
+    updateEditableValueForReminder(state, { id, value }) {
+      const index = state.reminders.findIndex(reminder => reminder.id === id);
+      state.reminders[index].editable = value
+    },
+    updateReminder(state, obj) {
+      const index = state.reminders.findIndex(reminder => reminder.id === obj.id);
+      state.reminders[index].description = obj.description
+      state.reminders[index].due = obj.due
+      state.reminders[index].editable = false
     }
   },
   actions: {
+    editField(ctx, id) {
+      ctx.commit("updateEditableValueForReminder", { id, value: true })
+    },
+    exitEditField(ctx, id) {
+      ctx.commit("updateEditableValueForReminder", { id, value: false })
+    },
+    updateReminder(ctx, obj) {
+      ReminderManager.updateReminder(obj.id, obj)
+        .then(resp => {
+          if (!resp.data.ok) {
+            throw new Error(`Response received from server but not ok, ${resp.data}`)
+          }
+          ctx.commit("updateReminder", obj)
+        })
+        .catch(err => {
+          ctx.commit("setGlobalErrorMessage", `Failed to update the reminder for the user`)
+          console.error(`Failed to update reminder ${err}`)
+        })
+    },
     deleteReminder(ctx, id) {
       ReminderManager.deleteReminder(id)
         .then(resp => {

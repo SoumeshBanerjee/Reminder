@@ -1,7 +1,7 @@
 <template>
     <div class="modal" :class="{'is-active': isShow}">
     <div class="modal-background" @click="dismissPrompt"></div>
-    <div class="modal-card">
+    <div class="modal-card" :style="{'height': height}">
         <header class="modal-card-head">
             <p class="modal-card-title">{{promptTitle}}</p>
                 <button class="delete" aria-label="close" @click="dismissPrompt"></button>
@@ -25,7 +25,8 @@ export default {
         isShow: Boolean,
         promptTitle: String,
         promptOkBtn: String,
-        promptOkBtnClass: String
+        promptOkBtnClass: String,
+        height: String
     },
     methods: {
         dismissPrompt(){
